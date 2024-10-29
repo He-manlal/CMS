@@ -1,22 +1,25 @@
 // components/ui/use-toast.js
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 
 export const useToast = () => {
   const [toasts, setToasts] = useState([]);
 
-  const addToast = (toast) => {
-    setToasts((prev) => [...prev, toast]);
+  // Add a new toast with an auto-generated unique ID
+  const addToast = useCallback((toast) => {
+    const toastWithId = { ...toast, id: Date.now() }; // Generate unique ID
+    setToasts((prev) => [...prev, toastWithId]);
 
-    // Automatically remove the toast after a delay
+    // Automatically remove the toast after 3 seconds (adjustable)
     setTimeout(() => {
-      removeToast(toast.id);
-    }, 3000); // Adjust duration as needed
-  };
+      removeToast(toastWithId.id);
+    }, toast.duration || 3000);
+  }, []);
 
-  const removeToast = (id) => {
+  // Remove toast by ID
+  const removeToast = useCallback((id) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
-  };
+  }, []);
 
   return {
     toasts,
@@ -24,4 +27,3 @@ export const useToast = () => {
     removeToast,
   };
 };
-
