@@ -20,12 +20,17 @@ export async function POST(request) {
 
       if (isMatch) {
         const userId = user.id;
+        const typeOfUser = user.type_of_user; // Get type_of_user from the database
         
         // Create a JWT token with the user ID
         const token = jwt.sign({ userId }, secretKey, { expiresIn: '1h' });
 
         // Set the token as an HTTP-only cookie
-        return new NextResponse(JSON.stringify({ success: true, message: "Login successful" }), {
+        return new NextResponse(JSON.stringify({ 
+          success: true, 
+          message: "Login successful", 
+          type_of_user: typeOfUser // Include type_of_user in the response
+        }), {
           headers: {
             "Content-Type": "application/json",
             "Set-Cookie": `token=${token}; HttpOnly; Path=/; Max-Age=3600`

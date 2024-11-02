@@ -19,7 +19,7 @@ export async function GET(request) {
 
     // Query to fetch the previous complaints filed by the user
     const [complaints] = await pool.execute(
-      `SELECT complaint_id, description, date_of_crime, nature_of_crime, filed_against, status, date_filed 
+      `SELECT complaint_id, description, date_of_crime, nature_of_crime, location, filed_against, status, date_filed 
        FROM complaint 
        WHERE filed_by = ?`,
       [userId]

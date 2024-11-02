@@ -13,6 +13,7 @@ export default function ComplaintPage() {
   const [natureOfCrime, setNatureOfCrime] = useState("");
   const [description, setDescription] = useState("");
   const [date_of_crime, setDateOfCrime] = useState("");
+  const [location, setLocation] = useState("");
   const [filedAgainst, setFiledAgainst] = useState("");
   const [expandedComplaint, setExpandedComplaint] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,7 +44,7 @@ export default function ComplaintPage() {
 
   const fetchPreviousComplaints = async (userId) => {
     try {
-      const response = await fetch(`/api/user-complaints/`); // Adjust API endpoint as necessary
+      const response = await fetch(`/api/user-complaints/`); 
       const data = await response.json();
 
       if (data.success && Array.isArray(data.complaints)) {
@@ -72,6 +73,7 @@ export default function ComplaintPage() {
           description,
           date_of_crime,
           filedAgainst,
+          location,
         }),
       });
 
@@ -86,6 +88,7 @@ export default function ComplaintPage() {
         setNatureOfCrime("");
         setDescription("");
         setDateOfCrime("");
+        setLocation("");
         setFiledAgainst("");
 
         // Fetch updated complaints after submission
@@ -142,15 +145,25 @@ export default function ComplaintPage() {
           <form onSubmit={handleSubmit}>
             <div className="grid w-full items-center gap-4">
               <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="natureOfCrime">Nature of Crime</Label>
-                <Input
-                  id="natureOfCrime"
-                  aria-label="Nature of Crime"
-                  placeholder="Enter the nature of the crime"
-                  value={natureOfCrime}
-                  onChange={(e) => setNatureOfCrime(e.target.value)}
-                  required
-                />
+              <Label htmlFor="natureOfCrime">Nature of Crime</Label>
+              <select
+                id="natureOfCrime"
+                aria-label="Nature of Crime"
+                value={natureOfCrime}
+                onChange={(e) => setNatureOfCrime(e.target.value)}
+                required
+                className="border rounded p-2" // Optional, add styling here if needed
+              >
+                <option value="" disabled>Select the nature of the crime</option>
+                <option value="Robbery">Robbery</option>
+                <option value="Assault">Assault</option>
+                <option value="Vandalism">Vandalism</option>
+                <option value="Kidnapping">Kidnapping</option>
+                <option value="Burglary">Burglary</option>
+                <option value="Murder">Murder</option>
+                <option value="Fraud">Fraud</option>
+                <option value="Cyber Crime">Cyber Crime</option>
+                </select>
               </div>
               <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="description">Description</Label>
@@ -171,6 +184,17 @@ export default function ComplaintPage() {
                   aria-label="Date of Crime"
                   value={date_of_crime}
                   onChange={(e) => setDateOfCrime(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="flex flex-col space-y-1.5">
+                <Label htmlFor="location">Location</Label>
+                <Input
+                  id="location"
+                  aria-label="Location"
+                  placeholder="Enter the location"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
                   required
                 />
               </div>
@@ -226,6 +250,8 @@ export default function ComplaintPage() {
                         <div>
                           <p><strong>Nature of Crime:</strong> {complaint.nature_of_crime}</p>
                           <p><strong>Date of Crime:</strong> {complaint.date_of_crime}</p>
+                          <p><strong>Location</strong> {complaint.location}</p>
+
                           <span>
                             <strong>Status:</strong> {complaint.status === "Resolved"
                               ? "This complaint has been resolved"

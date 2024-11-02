@@ -3,16 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-
 export default function Login() {
   const [email, setEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginStatus, setLoginStatus] = useState(null);  // State to track login status
   const [userData, setUserData] = useState(null);  // State to store user data
 
-
   const router = useRouter();
-
 
   const handleLogin = async () => {
     const response = await fetch('/api/login', {
@@ -28,8 +25,13 @@ export default function Login() {
     if (data.success) {
       setLoginStatus('success');  // Set status as successful
       setUserData(data);
-      router.push('/public_user');
-  // Store any additional user data from the response
+      
+      // Redirect based on type_of_user
+      if (data.type_of_user === 'Admin') {
+        router.push('/admin');
+      } else {
+        router.push('/public_user'); // Assuming you have a public-user page
+      }
     } else {
       setLoginStatus('error');  // Set status as error
     }
@@ -43,7 +45,6 @@ export default function Login() {
         <div>
           <h2>Login Successful</h2>
           <p>Welcome, {userData.message}!</p> {/* Display user-specific data */}
-          {/* Add anything else you want to show on successful login */}
         </div>
       ) : (
         <div>

@@ -17,12 +17,12 @@ export async function POST(request) {
     const userId = decoded.userId;
 
     // Get data from the request body
-    const { natureOfCrime, description, date_of_crime, filedAgainst } = await request.json();
+    const { natureOfCrime, description, date_of_crime, filedAgainst, location} = await request.json();
 
     // Insert complaint into the database
     const [result] = await pool.execute(
-      `INSERT INTO complaint (description, date_of_crime, nature_of_crime, filed_by, filed_against) VALUES (?, ?, ?, ?, ?)`,
-      [description, date_of_crime, natureOfCrime, userId, filedAgainst]
+      `INSERT INTO complaint (description, date_of_crime, nature_of_crime, filed_by, filed_against, location) VALUES (?, ?, ?, ?, ?, ?)`,
+      [description, date_of_crime, natureOfCrime, userId, filedAgainst, location]
     );
 
     return NextResponse.json({ success: true, message: 'Complaint submitted successfully', complaintId: result.insertId });
