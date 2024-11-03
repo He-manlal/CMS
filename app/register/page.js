@@ -25,6 +25,7 @@ export default function Register() {
 
     setLoading(true); // Start loading
     try {
+      
       const response = await fetch('/api/register', {
         method: 'POST',
         headers: {

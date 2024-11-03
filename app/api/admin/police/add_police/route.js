@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken'; // Ensure you have the jsonwebtoken library
+import bcrypt from 'bcrypt';
 
 import pool from '/app/lib/db'; // Adjust according to your project structure
 
@@ -19,7 +19,7 @@ export async function POST(request) {
 
     try {
       // Insert user into the users table
-      const password = jwt.sign(official_email, process.env.JWT_SECRET); // Encode email with JWT secret
+      const password = await bcrypt.hash('123456',10); // Encode email with JWT secret
       const [userResult] = await connection.execute(
         'INSERT INTO users (email, password, type_of_user) VALUES (?, ?, ?)',
         [official_email, password, 'Police']

@@ -29,6 +29,8 @@ export default function Login() {
       // Redirect based on type_of_user
       if (data.type_of_user === 'Admin') {
         router.push('/admin');
+      } else if(data.type_of_user === 'Police'){
+          router.push('/police')
       } else {
         router.push('/public_user'); // Assuming you have a public-user page
       }

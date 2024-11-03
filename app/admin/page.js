@@ -8,10 +8,32 @@ import Label from "@/components/ui/label";
 import Button from "@/components/ui/button";
 import Select, { SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
+import Modal from '@/components/ui/modal';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [officials, setOfficials] = useState([]);
+  const [dashboardStats, setDashboardStats] = useState({
+    totalComplaints: 0,
+    activeCases: 0,
+    policeOfficers: 0,
+    judges: 0,
+  });
+
+  useEffect(() => {
+    const fetchDashboardStats = async () => {
+      try {
+        const response = await fetch('/api/admin/dashboard');
+        if (!response.ok) throw new Error('Failed to fetch dashboard stats');
+        const data = await response.json();
+        setDashboardStats(data);
+      } catch (error) {
+        console.error('Error fetching dashboard stats:', error);
+      }
+    };
+
+    fetchDashboardStats();
+  }, []);
 
   // Mock data for demonstration
   const complaints = [
@@ -45,7 +67,7 @@ export default function AdminDashboard() {
           <TabsTrigger value="complaints">Complaints</TabsTrigger>
           <TabsTrigger value="cases">Cases</TabsTrigger>
         </TabsList>
-
+{/*
         <TabsContent value="dashboard">
           <Card>
             <CardHeader>
@@ -58,6 +80,24 @@ export default function AdminDashboard() {
                 <DashboardCard title="Active Cases" value="43" />
                 <DashboardCard title="Police Officers" value="78" />
                 <DashboardCard title="Judges" value="12" />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+*/}
+        <TabsContent value="dashboard">
+          <Card>
+            <CardHeader>
+              <CardTitle>Overview</CardTitle>
+              <CardDescription>Quick stats of the crime management system</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <DashboardCard title="Total Complaints" value={dashboardStats.totalComplaints} />
+                <DashboardCard title="Active Investigations" value={dashboardStats.activeCases} />
+                <DashboardCard title="Court Cases" value={dashboardStats.courtCases} />
+                <DashboardCard title="Police Officers" value={dashboardStats.policeOfficers} />
+                <DashboardCard title="Judges" value={dashboardStats.judges} />
               </div>
             </CardContent>
           </Card>
@@ -181,53 +221,7 @@ export default function AdminDashboard() {
         <TabsContent value="assign-complaints">
           <AssignComplaintsForm />
         </TabsContent>
-{/*
-        <TabsContent value="assign-complaints">
-          <Card>
-            <CardHeader>
-              <CardTitle>Assign Complaints</CardTitle>
-              <CardDescription>Assign complaints to officials</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Assigned To</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {complaints.map((complaint) => (
-                    <TableRow key={complaint.id}>
-                      <TableCell>{complaint.title}</TableCell>
-                      <TableCell>{complaint.status}</TableCell>
-                      <TableCell>
-                        <Select>
-                          <SelectTrigger>
-                            <SelectValue placeholder={complaint.assignedTo} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {officials.map((official) => (
-                              <SelectItem key={official.id} value={official.name}>
-                                {official.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell>
-                        <Button>Assign</Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-*/}
+
         <TabsContent value="assign-cases">
           <Card>
             <CardHeader>
@@ -277,38 +271,9 @@ export default function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="complaints">
-          <Card>
-            <CardHeader>
-              <CardTitle>Complaints</CardTitle>
-              <CardDescription>View all complaints</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Filed By</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {complaints.map((complaint) => (
-                    <TableRow key={complaint.id}>
-                      <TableCell>{complaint.title}</TableCell>
-                      <TableCell>{complaint.status}</TableCell>
-                      <TableCell>{complaint.assignedTo}</TableCell>
-                      <TableCell>
-                        <Button>View</Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+          <ComplaintsTab />
         </TabsContent>
-
+        
         <TabsContent value="cases">
           <Card>
             <CardHeader>
@@ -614,6 +579,96 @@ function AssignComplaintsForm() {
         </Table>
       </CardContent>
     </Card>
+  );
+}
+
+function ComplaintsTab() {
+  const [complaints, setComplaints] = useState([]);
+  const [selectedComplaint, setSelectedComplaint] = useState(null);
+  
+  useEffect(() => {
+    async function fetchComplaints() {
+      try {
+        const response = await fetch('/api/admin/complaints/fetch_all_complaints');
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        setComplaints(data);
+      } catch (error) {
+        console.error('Error fetching complaints:', error);
+      }
+    }
+
+    fetchComplaints();
+  }, []);
+
+  const handleViewComplaint = (complaintId) => {
+    // Find the selected complaint from the complaints state
+    const complaint = complaints.find(c => c.complaint_id === complaintId);
+    if (complaint) {
+      setSelectedComplaint(complaint);
+    } else {
+      console.error('Complaint not found');
+    }
+  };
+
+  return (
+    <div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Complaints</CardTitle>
+          <CardDescription>View all complaints</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Title</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Filed By</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {complaints.map((complaint) => (
+                <TableRow key={complaint.complaint_id}>
+                  <TableCell>{complaint.nature_of_crime}</TableCell>
+                  <TableCell>{complaint.status}</TableCell>
+                  <TableCell>{complaint.filed_by}</TableCell>
+                  <TableCell>
+                    <Button onClick={() => handleViewComplaint(complaint.complaint_id)}>
+                      View
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Display selected complaint details directly in the component */}
+      {selectedComplaint && (
+        <div className="mt-4 p-4 border border-gray-300 rounded">
+          <h2>Complaint Details</h2>
+          <p><strong>Nature of Crime:</strong> {selectedComplaint.nature_of_crime}</p>
+          <p><strong>Date Filed:</strong> {selectedComplaint.date_filed}</p>
+          <p><strong>Status:</strong> {selectedComplaint.status}</p>
+          <p><strong>Filed By:</strong> {selectedComplaint.filed_by}</p>
+          
+          {selectedComplaint.investigation && (
+            <>
+              <h3>Investigation Details</h3>
+              <p><strong>Investigation ID:</strong> {selectedComplaint.investigation.investigation_id}</p>
+              <p><strong>Initiated By:</strong> {selectedComplaint.investigation.initiated_by}</p>
+              <p><strong>Date Initiated:</strong> {selectedComplaint.investigation.date_of_assignment}</p>
+              <p><strong>Date of Completion:</strong> {selectedComplaint.investigation.date_of_completion || selectedComplaint.investigation.status}</p>
+              <p><strong>Investigating Officer:</strong> {selectedComplaint.investigation.officer.fullName || 'Not Assigned'}</p>
+              {/* Display any other relevant investigation data */}
+            </>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
