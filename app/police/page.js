@@ -1,13 +1,16 @@
 // app/police/page.js
 "use client"
 
+import { notebooks_v2 } from 'googleapis';
 import { useEffect, useState } from 'react';
 
 export default function PolicePage() {
   const [officer, setOfficer] = useState(null);
   const [complaints, setComplaints] = useState([]);
-  const [fileStates, setFileStates] = useState({}); // For file upload state
+  const [fileStates, setFileStates] = useState({});
+  const [statusStates, setStatusStates] = useState({}); // For tracking status updates
   const [error, setError] = useState(null);
+  const [notesStates, setNotesStates] = useState({});
 
   const fetchOfficerDetails = async () => {
     const email = localStorage.getItem('userEmail');
@@ -46,29 +49,86 @@ export default function PolicePage() {
     }));
   };
 
+
+  const handleAddNote = async (investigation_id, complaintId) => {
+    const note = notesStates[complaintId];
+    if (!note) {
+      alert("Please enter a note.");
+      return;
+    }
+    console.log(notebooks_v2)
+    try {
+      const response = await fetch('/api/police', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ investigation_id, note }),
+      });
+  
+      if (!response.ok) throw new Error(`Failed to add note: ${response.statusText}`);
+  
+      alert('Note added successfully');
+      setNotesStates(prev => ({ ...prev, [complaintId]: '' })); // Clear the note input after adding
+    } catch (error) {
+      console.error("Error adding note:", error);
+      alert(`Error: ${error.message}`);
+    }
+  };
+  
+
+
+  const handleStatusChange = (event, complaintId) => {
+    const status = event.target.value;
+    setStatusStates(prev => ({
+      ...prev,
+      [complaintId]: status
+    }));
+  };
+
+  const handleUpdateStatus = async (investigation_id, complaintId) => {
+    const newStatus = statusStates[complaintId];
+    if (!newStatus) {
+      alert("Please select a status.");
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/police', {
+        method: 'PUT', // Assume using PUT for updates
+        body: JSON.stringify({ investigation_id, newStatus }),
+      });
+
+      if (!response.ok) throw new Error(`Failed to update status: ${response.statusText}`);
+
+      alert('Status updated successfully');
+      // Optionally refetch data to show the updated status
+      fetchOfficerDetails();
+    } catch (error) {
+      console.error("Error updating status:", error);
+      alert(`Error: ${error.message}`);
+    }
+  };
+
+  
+
+
   const handleAddEvidence = async (investigation_id, complaintId) => {
     const { file } = fileStates[complaintId] || {};
-
     if (!file) {
       alert("Please upload a file.");
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("investigation_id", investigation_id);
-    formData.append("evidence_type", "Document"); // Set to a default or manage as needed
-
     try {
       const response = await fetch('/api/police', {
         method: 'POST',
-        body: formData,
+        body: JSON.stringify({ file, investigation_id }),
       });
 
-      if (!response.ok) throw new Error(`Failed to upload evidence: ${response.statusText}`);
+      if (!response?.ok) throw new Error(`Failed to upload evidence: ${response.statusText}`);
 
       alert('Evidence uploaded successfully');
-      // Clear file state for this complaint after successful upload
       setFileStates(prev => ({ ...prev, [complaintId]: {} }));
     } catch (error) {
       console.error("Error uploading evidence:", error);
@@ -109,6 +169,8 @@ export default function PolicePage() {
                 <th>Filed Against</th>
                 <th>Date Filed</th>
                 <th>Actions</th>
+                <th>Update Status</th>
+                <th>Notes</th>
               </tr>
             </thead>
             <tbody>
@@ -133,14 +195,38 @@ export default function PolicePage() {
                       Upload Evidence
                     </button>
                   </td>
+                  <td>
+                    <select value={statusStates[complaint.complaint_id] || ''} onChange={(e) => handleStatusChange(e, complaint.complaint_id)}>
+                      <option value="">Select Status</option>
+                      <option value="Ongoing">Ongoing</option>
+                      <option value="Resolved">Resolved</option>
+                      <option value="Closed">Closed</option>
+                    </select>
+                    <button onClick={() => handleUpdateStatus(complaint.investigation_id, complaint.complaint_id)}>
+                      Update Status
+                    </button>
+                  </td>
+                  <td>
+                  <textarea
+                    placeholder="Add a note..."
+                    value={notesStates[complaint.complaint_id] || ''}
+                    onChange={(e) => {
+                      setNotesStates(prev => ({
+                        ...prev,
+                        [complaint.complaint_id]: e.target.value
+                      }));
+                    }}
+                  />
+                  <button onClick={() => handleAddNote(complaint.investigation_id, complaint.complaint_id)}>
+                    Add Note
+                  </button>
+                </td>
                 </tr>
               ))}
             </tbody>
           </table>
-
         </div>
       )}
-
       <style jsx>{`
         /* Lighter theme styling */
         .police-page {
@@ -205,3 +291,5 @@ export default function PolicePage() {
     </div>
   );
 }
+
+
