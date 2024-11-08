@@ -1,4 +1,3 @@
-// app/police/page.js
 "use client"
 
 // import { notebooks_v2 } from 'googleapis';
@@ -244,6 +243,17 @@ export default function PolicePage() {
                   <button onClick={() => handleUpdateEvidence(complaint.investigation_id, complaint.complaint_id)}>
                     Update Evidence
                   </button>
+                  </td>
+                  <td>
+                    <select value={statusStates[complaint.complaint_id] || ''} onChange={(e) => handleStatusChange(e, complaint.complaint_id)}>
+                      <option value="">Select Status</option>
+                      <option value="Ongoing">Ongoing</option>
+                      <option value="Resolved">Resolved</option>
+                      <option value="Closed">Closed</option>
+                    </select>
+                    <button onClick={() => handleUpdateStatus(complaint.investigation_id, complaint.complaint_id)}>
+                      Update Status
+                    </button>
                   </td>
 
                   <td>

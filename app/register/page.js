@@ -54,23 +54,32 @@ export default function Register() {
   };
 
   return (
-    <div>
-      <h1>Register Page</h1>
-      <input
-        type='text'
-        name="email"
-        placeholder="Email"
-        onChange={e => setEmail(e.target.value)}
-      />
-      <input
-        type='password'
-        name="password"
-        placeholder="Password"
-        onChange={e => setRegisterPassword(e.target.value)}
-      />
-      <button onClick={handleRegister} disabled={loading}>
-        {loading ? "Registering..." : "Register"}
-      </button>
+    <div className="flex items-center justify-center h-screen bg-cover bg-center" style={{ backgroundImage: "url('/images/register.jpg')" }}>
+      <div className="bg-white bg-opacity-60 backdrop-blur-lg p-10 rounded-xl shadow-xl w-96 max-w-lg">
+        <h1 className="text-3xl font-semibold text-gray-800 mb-8 text-center">Register</h1>
+
+        <input
+          type="text"
+          name="email"
+          placeholder="Email"
+          className="w-full p-4 mt-4 mb-6 rounded-md border border-gray-300 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          onChange={e => setEmail(e.target.value)}
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          className="w-full p-4 mb-6 rounded-md border border-gray-300 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          onChange={e => setRegisterPassword(e.target.value)}
+        />
+        <button
+          onClick={handleRegister}
+          disabled={loading}
+          className="w-full py-3 bg-orange-500 text-white font-semibold rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-300"
+        >
+          {loading ? "Registering..." : "Register"}
+        </button>
+      </div>
     </div>
   );
 }

@@ -41,81 +41,44 @@ export default function Login() {
   };
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.heading}>Login Page</h1>
+    <div className="flex items-center justify-center h-screen bg-cover bg-center" style={{ backgroundImage: "url('/images/login.jpg')" }}>
+      <div className="bg-white bg-opacity-60 backdrop-blur-lg p-10 rounded-xl shadow-xl w-96 max-w-lg">
+        <h1 className="text-3xl font-semibold text-gray-800 mb-8 text-center">Login</h1>
 
-      {loginStatus === 'success' ? (
-        <div>
-          <h2 style={styles.successMessage}>Login Successful</h2>
-          <p style={styles.welcomeMessage}>Welcome, {userData.message}!</p> {/* Display user-specific data */}
-        </div>
-      ) : (
-        <div>
-          <input
-            type='text'
-            name="email"
-            placeholder="Email"
-            style={styles.input}
-            onChange={e => setEmail(e.target.value)}
-          />
-          <input
-            type='password'
-            name="password"
-            placeholder="Password"
-            style={styles.input}
-            onChange={e => setLoginPassword(e.target.value)}
-          />
-          <button onClick={handleLogin} style={styles.button}>Login</button>
+        {loginStatus === 'success' ? (
+          <div>
+            <h2 className="text-green-500 text-center">Login Successful</h2>
+            <p className="text-center mt-2">Welcome, {userData.message}!</p>
+          </div>
+        ) : (
+          <div>
+            <input
+              type="text"
+              name="email"
+              placeholder="Email"
+              className="w-full p-4 mt-4 mb-6 rounded-md border border-gray-300 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              onChange={e => setEmail(e.target.value)}
+            />
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              className="w-full p-4 mb-6 rounded-md border border-gray-300 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              onChange={e => setLoginPassword(e.target.value)}
+            />
+            <button 
+              onClick={handleLogin} 
+              className="w-full py-3 bg-orange-500 text-white font-semibold rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-300"
+            >
+              Login
+            </button>
 
-          {/* Show an error message if login fails */}
-          {loginStatus === 'error' && <p style={styles.errorMessage}>Invalid credentials, please try again!</p>}
-        </div>
-      )}
+            {loginStatus === 'error' && (
+              <p className="text-red-500 text-center mt-4">Invalid credentials, please try again!</p>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '100vh',
-    backgroundColor: '#121212', // Dark background
-    color: '#ffffff', // Light text color
-    padding: '20px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 10px rgba(255, 255, 255, 0.1)', // Lighter shadow for contrast
-  },
-  heading: {
-    marginBottom: '20px',
-  },
-  input: {
-    width: '300px',
-    padding: '10px',
-    margin: '10px 0',
-    borderRadius: '4px',
-    border: '1px solid #444', // Darker border
-    backgroundColor: '#1e1e1e', // Dark input background
-    color: '#ffffff', // Light input text
-  },
-  button: {
-    padding: '10px 20px',
-    backgroundColor: '#007bff', // Blue button
-    color: '#fff',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontSize: '16px',
-  },
-  successMessage: {
-    color: '#4caf50', // Green color for success
-  },
-  welcomeMessage: {
-    margin: '10px 0',
-  },
-  errorMessage: {
-    color: 'red', // Red color for errors
-  },
-};
