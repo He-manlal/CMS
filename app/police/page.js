@@ -1,7 +1,7 @@
 // app/police/page.js
 "use client"
 
-//import { notebooks_v2 } from 'googleapis';
+// import { notebooks_v2 } from 'googleapis';
 import { useEffect, useState } from 'react';
 
 export default function PolicePage() {
@@ -11,6 +11,8 @@ export default function PolicePage() {
   const [statusStates, setStatusStates] = useState({}); // For tracking status updates
   const [error, setError] = useState(null);
   const [notesStates, setNotesStates] = useState({});
+  const [evidencetypeStates, setEvidencetypeStates] = useState({});
+  const [actionInputs, setActionInputs] = useState({});
 
   const fetchOfficerDetails = async () => {
     const email = localStorage.getItem('userEmail');
@@ -110,31 +112,67 @@ export default function PolicePage() {
     }
   };
 
+
+  const handleEvidenceChange = (event, complaintId) => {
+    const evidenceType = event.target.value;
+    setEvidencetypeStates(prev => ({
+      ...prev,
+      [complaintId]: evidenceType
+    }));
+  };
+   
+  const handleUpdateEvidence = async (investigation_id, complaintId) => {
+    const newEvidenceType = evidencetypeStates[complaintId];
+    const additionalData = actionInputs[complaintId];
   
-
-
-  const handleAddEvidence = async (investigation_id, complaintId) => {
-    const { file } = fileStates[complaintId] || {};
-    if (!file) {
-      alert("Please upload a file.");
+    if (!newEvidenceType || !additionalData) {
+      alert("Please select an evidence type and enter additional data.");
       return;
     }
-
+  
     try {
-      const response = await fetch('/api/police', {
+      const response = await fetch('/api/police/evidence', {
         method: 'POST',
-        body: JSON.stringify({ file, investigation_id }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ investigation_id, newEvidenceType, additionalData }),
       });
-
-      if (!response?.ok) throw new Error(`Failed to upload evidence: ${response.statusText}`);
-
-      alert('Evidence uploaded successfully');
-      setFileStates(prev => ({ ...prev, [complaintId]: {} }));
+  
+      if (!response.ok) throw new Error(`Failed to update evidence: ${response.statusText}`);
+  
+      alert('Evidence updated successfully');
     } catch (error) {
-      console.error("Error uploading evidence:", error);
+      console.error("Error updating evidence:", error);
       alert(`Error: ${error.message}`);
     }
   };
+    
+  
+
+
+  // const handleAddEvidence = async (investigation_id, complaintId) => {
+  //   const { file } = fileStates[complaintId] || {};
+  //   if (!file) {
+  //     alert("Please upload a file.");
+  //     return;
+  //   }
+
+  //   try {
+  //     const response = await fetch('/api/police', {
+  //       method: 'POST',
+  //       body: JSON.stringify({ file, investigation_id }),
+  //     });
+
+  //     if (!response?.ok) throw new Error(`Failed to upload evidence: ${response.statusText}`);
+
+  //     alert('Evidence uploaded successfully');
+  //     setFileStates(prev => ({ ...prev, [complaintId]: {} }));
+  //   } catch (error) {
+  //     console.error("Error uploading evidence:", error);
+  //     alert(`Error: ${error.message}`);
+  //   }
+  // };
 
   return (
     <div className="police-page">
@@ -187,25 +225,27 @@ export default function PolicePage() {
                   <td>{complaint.filed_against}</td>
                   <td>{complaint.date_filed}</td>
                   <td>
-                    <input 
-                      type="file" 
-                      onChange={(e) => handleFileChange(e, complaint.complaint_id)} 
-                    />
-                    <button onClick={() => handleAddEvidence(complaint.investigation_id, complaint.complaint_id)}>
-                      Upload Evidence
-                    </button>
+                  <select value={evidencetypeStates[complaint.complaint_id] || ''} onChange={(e) => handleEvidenceChange(e, complaint.complaint_id)}>
+                    <option value="">Select Evidence Type</option>
+                    <option value="Document">Document</option>
+                    <option value="Image">Image</option>
+                  </select>
+                  <input
+                    type="text"
+                    placeholder="Enter additional data"
+                    value={actionInputs[complaint.complaint_id] || ''}
+                    onChange={(e) =>
+                      setActionInputs(prev => ({
+                        ...prev,
+                        [complaint.complaint_id]: e.target.value
+                      }))
+                    }
+                  />
+                  <button onClick={() => handleUpdateEvidence(complaint.investigation_id, complaint.complaint_id)}>
+                    Update Evidence
+                  </button>
                   </td>
-                  <td>
-                    <select value={statusStates[complaint.complaint_id] || ''} onChange={(e) => handleStatusChange(e, complaint.complaint_id)}>
-                      <option value="">Select Status</option>
-                      <option value="Ongoing">Ongoing</option>
-                      <option value="Resolved">Resolved</option>
-                      <option value="Closed">Closed</option>
-                    </select>
-                    <button onClick={() => handleUpdateStatus(complaint.investigation_id, complaint.complaint_id)}>
-                      Update Status
-                    </button>
-                  </td>
+
                   <td>
                   <textarea
                     placeholder="Add a note..."
@@ -291,5 +331,3 @@ export default function PolicePage() {
     </div>
   );
 }
-
-
