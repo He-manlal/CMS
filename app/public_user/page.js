@@ -116,12 +116,14 @@ export default function ComplaintPage() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "Resolved":
+      case "Investigation Completed":
         return "bg-green-500";
       case "Under Investigation":
         return "bg-yellow-500";
-      case "Pending":
-        return "bg-blue-500";
+      case "Yet to be assigned":
+        return "bg-orange-500";
+      case "In Court":
+        return "bg-red-500"
       default:
         return "bg-gray-500";
     }

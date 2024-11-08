@@ -35,6 +35,28 @@ export default function AdminDashboard() {
     fetchDashboardStats();
   }, []);
 
+  const handleTabChange = async (value) => {
+    const roleMap = {
+      "police": "Police Officer",
+      "judges": "Judge",
+      "prison-officials": "Prison Official",
+    };
+    const role = roleMap[value];
+  
+    try {
+      const response = await fetch(`/api/admin/fetch_respective_officials?role=${role}`);
+      if (!response.ok) throw new Error("Failed to fetch officials");
+  
+      const data = await response.json();
+      setOfficials(data.officials);
+    } catch (error) {
+      console.error("Error fetching officials:", error);
+    }
+  };
+  useEffect(() => {
+    handleTabChange("police"); // Fetch police officials by default
+  }, []);
+
   // Mock data for demonstration
   const complaints = [
     {
@@ -67,24 +89,7 @@ export default function AdminDashboard() {
           <TabsTrigger value="complaints">Complaints</TabsTrigger>
           <TabsTrigger value="cases">Cases</TabsTrigger>
         </TabsList>
-{/*
-        <TabsContent value="dashboard">
-          <Card>
-            <CardHeader>
-              <CardTitle>Overview</CardTitle>
-              <CardDescription>Quick stats of the crime management system</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <DashboardCard title="Total Complaints" value="156" />
-                <DashboardCard title="Active Cases" value="43" />
-                <DashboardCard title="Police Officers" value="78" />
-                <DashboardCard title="Judges" value="12" />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-*/}
+
         <TabsContent value="dashboard">
           <Card>
             <CardHeader>
@@ -110,7 +115,7 @@ export default function AdminDashboard() {
               <CardDescription>Add, remove, or update details of officials</CardDescription>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="police" className="w-full mb-4">
+              <Tabs defaultValue="police" className="w-full mb-4" onValueChange={handleTabChange}>
                 <TabsList>
                   <TabsTrigger value="police">Police</TabsTrigger>
                   <TabsTrigger value="judges">Judges</TabsTrigger>
@@ -312,13 +317,13 @@ export default function AdminDashboard() {
   );
 }
 
-
 function ManageOfficialForm({ role }) {
   const [Fname, setFname] = useState("");
   const [Lname, setLname] = useState("");
   const [DOB, setDOB] = useState("");
   const [police_rank, setPoliceRank] = useState("");
   const [station, setStation] = useState("");
+  const [court, setCourt] = useState("");
   const [official_email, setOfficialEmail] = useState("");
   const [phoneNumbers, setPhoneNumbers] = useState([""]);
 
@@ -340,19 +345,25 @@ function ManageOfficialForm({ role }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
   
-    // Collect data and send to your API
     const data = {
       Fname,
       Lname,
       DOB,
-      police_rank,
-      station,
+      police_rank: role === "Police Officer" ? police_rank : undefined,
+      station: role === "Police Officer" ? station : undefined,
+      court: role === "Judge" ? court : undefined,
       official_email,
       phoneNumbers: phoneNumbers.filter((number) => number !== ""), // Filter out empty numbers
     };
   
     try {
-      const response = await fetch('/api/admin/police/add_police', {
+      const response = await fetch(`/api/admin/${
+        role === "Police Officer"
+          ? "police/add_police"
+          : role === "Judge"
+          ? "judges/add_judges"
+          : "prison_officials/add_prison_officials"
+      }`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -365,48 +376,46 @@ function ManageOfficialForm({ role }) {
       }
   
       const result = await response.json();
-      // Handle successful response
       console.log('Success:', result.message);
-      // Optionally reset the form or show a success message
-      setFname(''); // Reset first name
-      setLname(''); // Reset last name
-      setDOB(''); // Reset date of birth
-      setPoliceRank(''); // Reset police rank
-      setStation(''); // Reset station
-      setOfficialEmail(''); // Reset official email
-      setPhoneNumbers(['']); 
+      setFname('');
+      setLname('');
+      setDOB('');
+      setPoliceRank('');
+      setStation('');
+      setCourt('');
+      setOfficialEmail('');
+      setPhoneNumbers(['']);
   
     } catch (error) {
       console.error('Error submitting data:', error);
-      // Handle error response
-      alert('Failed to add police officer. Please try again.');
+      alert(`Failed to add ${role}. Please try again.`);
     }
   };
-  
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <Label htmlFor="Fname">First Name</Label>
+        <Input id="Fname" value={Fname} onChange={(e) => setFname(e.target.value)} placeholder="Enter first name" />
+      </div>
+      <div>
+        <Label htmlFor="Lname">Last Name</Label>
+        <Input id="Lname" value={Lname} onChange={(e) => setLname(e.target.value)} placeholder="Enter last name" />
+      </div>
+      <div>
+        <Label htmlFor="DOB">Date of Birth</Label>
+        <Input id="DOB" type="date" value={DOB} onChange={(e) => setDOB(e.target.value)} />
+      </div>
+      
       {role === "Police Officer" && (
         <>
-          <div>
-            <Label htmlFor="Fname">First Name</Label>
-            <Input id="Fname" value={Fname} onChange={(e) => setFname(e.target.value)} placeholder="Enter first name" />
-          </div>
-          <div>
-            <Label htmlFor="Lname">Last Name</Label>
-            <Input id="Lname" value={Lname} onChange={(e) => setLname(e.target.value)} placeholder="Enter last name" />
-          </div>
-          <div>
-            <Label htmlFor="DOB">Date of Birth</Label>
-            <Input id="DOB" type="date" value={DOB} onChange={(e) => setDOB(e.target.value)} />
-          </div>
           <div>
             <Label htmlFor="police_rank">Rank</Label>
             <select
               id="police_rank"
               value={police_rank}
               onChange={(e) => setPoliceRank(e.target.value)}
-              className="border rounded px-2 py-1 w-half" // Adjust styles as needed
+              className="border rounded px-2 py-1 w-half"
             >
               <option value="">Select Rank</option>
               <option value="Constable">Constable</option>
@@ -418,38 +427,36 @@ function ManageOfficialForm({ role }) {
             <Label htmlFor="station">Station</Label>
             <Input id="station" value={station} onChange={(e) => setStation(e.target.value)} placeholder="Enter station" />
           </div>
-          <div>
-            <Label htmlFor="official_email">Official Email</Label>
-            <Input id="official_email" value={official_email} onChange={(e) => setOfficialEmail(e.target.value)} placeholder="Enter official email" />
-          </div>
-          <div>
-            <Label>Phone Numbers</Label>
-            {phoneNumbers.map((number, index) => (
-              <div key={index} className="flex items-center space-x-2">
-                <Input
-                  value={number}
-                  onChange={(e) => handlePhoneChange(index, e.target.value)}
-                  placeholder="Enter phone number"
-                />
-                <Button type="button" onClick={() => removePhoneNumber(index)}>Remove</Button>
-              </div>
-            ))}
-            <Button type="button" onClick={addPhoneNumber}>Add Phone Number</Button>
-          </div>
         </>
       )}
-      {(role === "Judge" || role === "Prison Official") && (
-        <>
-          <div>
-            <Label htmlFor="officialName">Name</Label>
-            <Input id="officialName" placeholder={`Enter ${role} name`} />
-          </div>
-          <div>
-            <Label htmlFor="DOB">Date of Birth</Label>
-            <Input id="DOB" type="date" placeholder={`Enter ${role} date of birth`} />
-          </div>
-        </>
+
+      {role === "Judge" && (
+        <div>
+          <Label htmlFor="court">Court</Label>
+          <Input id="court" value={court} onChange={(e) => setCourt(e.target.value)} placeholder="Enter court name" />
+        </div>
       )}
+
+      <div>
+        <Label htmlFor="official_email">Official Email</Label>
+        <Input id="official_email" value={official_email} onChange={(e) => setOfficialEmail(e.target.value)} placeholder="Enter official email" />
+      </div>
+      
+      <div>
+        <Label>Phone Numbers</Label>
+        {phoneNumbers.map((number, index) => (
+          <div key={index} className="flex items-center space-x-2">
+            <Input
+              value={number}
+              onChange={(e) => handlePhoneChange(index, e.target.value)}
+              placeholder="Enter phone number"
+            />
+            <Button type="button" onClick={() => removePhoneNumber(index)}>Remove</Button>
+          </div>
+        ))}
+        <Button type="button" onClick={addPhoneNumber}>Add Phone Number</Button>
+      </div>
+
       <Button type="submit">Add {role}</Button>
     </form>
   );
