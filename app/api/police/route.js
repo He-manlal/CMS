@@ -3,7 +3,7 @@ import multer from 'multer'; // Import multer for handling file uploads
 import pool from '/app/lib/db'; // Import the database connection pool
 import fs from 'fs'; // Import the file system module
 import path from 'path'; // Import the path module
-import { google } from 'googleapis'; // Import Google APIs
+// import { google } from 'googleapis'; // Import Google APIs
 import { NextResponse } from 'next/server';
 
 // Set up multer for file upload
@@ -19,15 +19,15 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 // Google Drive API configuration
-const SERVICE_ACCOUNT_FILE = '/home/admin-user/Downloads/decisive-lambda-310021-e85c527026f5.json';
-const SCOPES = ['https://www.googleapis.com/auth/drive.file'];
+// const SERVICE_ACCOUNT_FILE = '/home/admin-user/Downloads/decisive-lambda-310021-e85c527026f5.json';
+// const SCOPES = ['https://www.googleapis.com/auth/drive.file'];
 
 // Initialize Google Drive API client
-const auth = new google.auth.GoogleAuth({
-  keyFile: SERVICE_ACCOUNT_FILE,
-  scopes: SCOPES,
-});
-const drive = google.drive({ version: 'v3', auth });
+// const auth = new google.auth.GoogleAuth({
+//   keyFile: SERVICE_ACCOUNT_FILE,
+//   scopes: SCOPES,
+// });
+// const drive = google.drive({ version: 'v3', auth });
 
 
 
@@ -90,47 +90,48 @@ export async function PUT(req, res) {
 }
 
 
- async function uploadEvidence(req, res) {
-  // Use multer to handle file upload
-  upload.single('file')(req, res, async (err) => {
-    if (err) {
-      return NextResponse.json({ message: 'File upload error' }, { status: 400 });
-    }
 
-    const { investigation_id } = req.body; // Get investigation ID from body
-    const evidence_type = "Document"; // Set evidence type
-    const file = req.file; // Access the uploaded file
+//  async function uploadEvidence(req, res) {
+//   // Use multer to handle file upload
+//   upload.single('file')(req, res, async (err) => {
+//     if (err) {
+//       return NextResponse.json({ message: 'File upload error' }, { status: 400 });
+//     }
 
-    // Validate required fields
-    if (!investigation_id || !evidence_type || !file) {
-      return NextResponse.json({ message: 'Investigation ID, evidence type, and file are required' }, { status: 400 });
-    }
+//     const { investigation_id } = req.body; // Get investigation ID from body
+//     const evidence_type = "Document"; // Set evidence type
+//     const file = req.file; // Access the uploaded file
 
-    const filePath = file.path; // Get the path of the uploaded file
+//     // Validate required fields
+//     if (!investigation_id || !evidence_type || !file) {
+//       return NextResponse.json({ message: 'Investigation ID, evidence type, and file are required' }, { status: 400 });
+//     }
 
-    try {
-      const folderId = '18fp238c55Ie_t8eqrd8hoBE5mE7n6P9G'; // Replace with your Google Drive folder ID
-      const mimeType = evidence_type === 'Image' ? 'image/jpeg' : 'application/pdf';
+//     const filePath = file.path; // Get the path of the uploaded file
 
-      // Upload file to Google Drive
-      const drivePath = await uploadFileToDrive(filePath, mimeType, folderId);
+//     try {
+//       const folderId = '18fp238c55Ie_t8eqrd8hoBE5mE7n6P9G'; // Replace with your Google Drive folder ID
+//       const mimeType = evidence_type === 'Image' ? 'image/jpeg' : 'application/pdf';
 
-      // Insert evidence record in the database
-      await pool.query(
-        'INSERT INTO evidence (investigation_id, evidence_type, image_path) VALUES (?, ?, ?)',
-        [investigation_id, evidence_type, drivePath]
-      );
+//       // Upload file to Google Drive
+//       const drivePath = await uploadFileToDrive(filePath, mimeType, folderId);
 
-      // Optionally, delete the temporary file after uploading
-      fs.unlinkSync(filePath);
+//       // Insert evidence record in the database
+//       await pool.query(
+//         'INSERT INTO evidence (investigation_id, evidence_type, image_path) VALUES (?, ?, ?)',
+//         [investigation_id, evidence_type, drivePath]
+//       );
 
-      return NextResponse.json({ message: 'Evidence uploaded and recorded successfully' }, { status: 201 });
-    } catch (error) {
-      console.error('Error uploading evidence:', error);
-      return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
-    }
-  });
-}
+//       // Optionally, delete the temporary file after uploading
+//       fs.unlinkSync(filePath);
+
+//       return NextResponse.json({ message: 'Evidence uploaded and recorded successfully' }, { status: 201 });
+//     } catch (error) {
+//       console.error('Error uploading evidence:', error);
+//       return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+//     }
+//   });
+// }
 
 
 
