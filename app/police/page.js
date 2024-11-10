@@ -2,6 +2,8 @@
 
 // import { notebooks_v2 } from 'googleapis';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Button from "@/components/ui/button";
 
 export default function PolicePage() {
   const [officer, setOfficer] = useState(null);
@@ -12,6 +14,7 @@ export default function PolicePage() {
   const [notesStates, setNotesStates] = useState({});
   const [evidencetypeStates, setEvidencetypeStates] = useState({});
   const [actionInputs, setActionInputs] = useState({});
+  const router = useRouter(); 
 
   const fetchOfficerDetails = async () => {
     const email = localStorage.getItem('userEmail');
@@ -173,9 +176,18 @@ export default function PolicePage() {
   //   }
   // };
 
+  const handleLogOut = () => {
+    router.push('/login');
+  };
+
   return (
     <div className="police-page">
-      <h1>Police Officer Details</h1>
+      <div className="absolute top-4 right-4">
+        <Button onClick={handleLogOut} className="bg-red-500 hover:bg-red-700 text-white">
+          LogOut
+        </Button>
+      </div>
+      <h1 style={{ fontWeight: 'bold' }}>Police Officer Details</h1>
 
       {error && <p className="error">{error}</p>}
 
@@ -192,6 +204,7 @@ export default function PolicePage() {
           </div>
 
           <h2>Complaints</h2>
+          <div className="complaints-table-container">
           <table>
             <thead>
               <tr>
@@ -276,25 +289,45 @@ export default function PolicePage() {
             </tbody>
           </table>
         </div>
+      </div>
       )}
       <style jsx>{`
         /* Lighter theme styling */
         .police-page {
-          background-color: #f4f4f9;
+          background-color: rgba(255, 165, 0, 0.7); /* Light background color */
           color: #333;
-          padding: 20px;
-          border-radius: 8px;
+          padding: 30px;
+          border-radius: 10px;
+          font-family: Arial, sans-serif;
         }
 
         .officer-info {
-          margin-bottom: 20px;
+          margin-bottom: 40px;
+          padding: 20px;
+          background-color: #ffffff;
+          border-radius: 10px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .officer-details {
-          border: 1px solid #ddd;
-          padding: 15px;
-          border-radius: 5px;
-          background-color: #ffffff;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 20px;
+          justify-content: space-between;
+        }
+
+        .officer-details p {
+          width: 48%; /* Make the columns take up half of the width */
+          font-size: 16px;
+          margin: 10px 0;
+          padding: 10px;
+          background-color: #f3f4f6;
+          border-radius: 8px;
+          border: 1px solid #e0e0e0;
+        }
+
+        .officer-details p strong {
+          color: #4a90e2; /* Slightly darker blue for the labels */
         }
 
         table {
@@ -336,6 +369,48 @@ export default function PolicePage() {
 
         button:hover {
           background-color: #4cae4c;
+        }
+
+        .complaints-table-container {
+          overflow-x: auto;
+          margin-top: 20px;
+        }
+
+        table {
+          min-width: 800px; /* Ensure table has a minimum width */
+        }
+
+        .complaints-table-container::-webkit-scrollbar {
+          height: 8px;
+        }
+
+        .complaints-table-container::-webkit-scrollbar-thumb {
+          background-color: #888;
+          border-radius: 4px;
+        }
+
+        .complaints-table-container::-webkit-scrollbar-thumb:hover {
+          background-color: #555;
+        }
+
+        .police-page {
+          font-size: 16px; /* Set a base font size for the police page */
+        }
+
+        .officer-info p {
+          font-size: 18px; /* Set a larger font size for officer info paragraphs */
+        }
+
+        .officer-details p {
+          font-size: 14px; /* Set a smaller font size for officer details paragraphs */
+        }
+
+        th {
+          font-size: 18px; /* Larger font size for table headers */
+        }
+
+        td {
+          font-size: 16px; /* Set font size for table data */
         }
       `}</style>
     </div>

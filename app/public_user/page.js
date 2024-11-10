@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState, useEffect } from "react";
 import Button from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +11,7 @@ import { AlertCircle, CheckCircle2, ChevronDown, ChevronUp, FileText, List } fro
 import Badge from "@/components/ui/badge";
 
 export default function ComplaintPage() {
+  const router = useRouter(); 
   const [natureOfCrime, setNatureOfCrime] = useState("");
   const [description, setDescription] = useState("");
   const [date_of_crime, setDateOfCrime] = useState("");
@@ -128,9 +130,17 @@ export default function ComplaintPage() {
         return "bg-gray-500";
     }
   };
+  const handleLogOut = () => {
+    router.push('/login');
+  };
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
+      <div className="absolute top-4 right-4">
+        <Button onClick={handleLogOut} className="bg-red-500 hover:bg-red-700 text-white">
+          LogOut
+        </Button>
+      </div>
       <h1 className="text-3xl font-bold mb-4 text-center">Register Complaints</h1>
       
       {userId && <p className="text-lg text-center mb-8">Welcome, User ID: {userId}</p>}

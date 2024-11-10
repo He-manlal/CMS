@@ -1,5 +1,5 @@
 "use client";
-
+import { useRouter } from 'next/navigation';
 import { useState, useEffect } from "react";
 import Tabs, { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle,} from "@/components/ui/card";
@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@
 import Modal from '@/components/ui/modal';
 
 export default function AdminDashboard() {
+  const router = useRouter(); 
   const [activeTab, setActiveTab] = useState("dashboard");
   const [officials, setOfficials] = useState([]);
   const [dashboardStats, setDashboardStats] = useState({
@@ -73,10 +74,19 @@ export default function AdminDashboard() {
     },
   ];
 
+  const handleLogOut = () => {
+    router.push('/login');
+  };
+
 
 
   return (
     <div className="container mx-auto p-4">
+      <div className="absolute top-4 right-4">
+        <Button onClick={handleLogOut} className="bg-red-500 hover:bg-red-700 text-white">
+          LogOut
+        </Button>
+      </div>
       <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
@@ -91,7 +101,7 @@ export default function AdminDashboard() {
         </TabsList>
 
         <TabsContent value="dashboard">
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Overview</CardTitle>
               <CardDescription>Quick stats of the crime management system</CardDescription>
@@ -109,7 +119,7 @@ export default function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="officials">
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Manage Officials</CardTitle>
               <CardDescription>Add, remove, or update details of officials</CardDescription>
@@ -137,7 +147,7 @@ export default function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="entities">
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Add Entities</CardTitle>
               <CardDescription>Add new prisons, crimes, and criminals</CardDescription>
@@ -228,7 +238,7 @@ export default function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="assign-cases">
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Assign Cases</CardTitle>
               <CardDescription>Assign cases to officials</CardDescription>
@@ -280,7 +290,7 @@ export default function AdminDashboard() {
         </TabsContent>
         
         <TabsContent value="cases">
-          <Card>
+          <Card className="dashboard-card">
             <CardHeader>
               <CardTitle>Cases</CardTitle>
               <CardDescription>View all cases</CardDescription>
@@ -532,7 +542,7 @@ function AssignComplaintsForm() {
   };
 
   return (
-    <Card>
+    <Card className="dashboard-card">
       <CardHeader>
         <CardTitle>Assign Complaints</CardTitle>
         <CardDescription>View previous complaints</CardDescription>
@@ -620,7 +630,7 @@ function ComplaintsTab() {
 
   return (
     <div>
-      <Card>
+      <Card className="dashboard-card">
         <CardHeader>
           <CardTitle>Complaints</CardTitle>
           <CardDescription>View all complaints</CardDescription>
@@ -675,6 +685,167 @@ function ComplaintsTab() {
           )}
         </div>
       )}
+      <style jsx>{`
+        /* General Styles */
+        body {
+          font-family: Arial, sans-serif;
+          background-color: #f4f4f9;
+          color: #333;
+          margin: 0;
+          padding: 0;
+        }
+
+        h2, h3 {
+          margin-bottom: 10px;
+          color: #2c3e50;
+        }
+
+        /* Card Styles */
+        .card {
+          background-color: white;
+          border-radius: 8px;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+          margin: 20px;
+          padding: 20px;
+        }
+
+        .card-header {
+          font-size: 1.25rem;
+          font-weight: bold;
+          margin-bottom: 15px;
+        }
+
+        .card-description {
+          font-size: 0.875rem;
+          color: #7f8c8d;
+        }
+
+        .card-content {
+          margin-top: 20px;
+        }
+
+        /* Table Styles */
+        table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+
+        th, td {
+          padding: 12px 15px;
+          text-align: left;
+          border-bottom: 1px solid #ddd;
+        }
+
+        th {
+          background-color: #f8f8f8;
+        }
+
+        tr:hover {
+          background-color: #f1f1f1;
+        }
+
+        button {
+          background-color: #3498db;
+          color: white;
+          padding: 8px 16px;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 0.875rem;
+          transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+          background-color: #2980b9;
+        }
+
+        button:disabled {
+          background-color: #bdc3c7;
+          cursor: not-allowed;
+        }
+
+        /* Select Dropdown */
+        select {
+          padding: 8px;
+          border-radius: 4px;
+          border: 1px solid #ddd;
+          width: 100%;
+          max-width: 250px;
+        }
+
+        /* Complaint Details Section */
+        .mt-4 {
+          margin-top: 16px;
+        }
+
+        .p-4 {
+          padding: 16px;
+        }
+
+        .border {
+          border: 1px solid #ddd;
+        }
+
+        .rounded {
+          border-radius: 8px;
+        }
+
+        .bg-gray-300 {
+          background-color: #e2e8f0;
+        }
+
+        /* Dashboard Cards */
+        .dashboard-card {
+          background-color: #fff;
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+          text-align: center;
+          width: 250px;
+          margin: 10px;
+        }
+
+        .dashboard-card h2 {
+          font-size: 1.25rem;
+          font-weight: bold;
+        }
+
+        .dashboard-card p {
+          font-size: 1.5rem;
+          color: #2c3e50;
+          margin-top: 8px;
+        }
+
+        /* Loading and Error States */
+        .loading-spinner {
+          display: inline-block;
+          width: 24px;
+          height: 24px;
+          border: 3px solid #f3f3f3;
+          border-top: 3px solid #3498db;
+          border-radius: 50%;
+          animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+          color: #e74c3c;
+          font-weight: bold;
+          margin-top: 10px;
+        }
+
+        /* Utility Classes */
+        .text-center {
+          text-align: center;
+        }
+  `
+      }
+
+      </style>
     </div>
   );
 }
