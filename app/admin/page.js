@@ -147,7 +147,7 @@ export default function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="entities">
-          <Card className="dashboard-card">
+          <Card>
             <CardHeader>
               <CardTitle>Add Entities</CardTitle>
               <CardDescription>Add new prisons, crimes, and criminals</CardDescription>
@@ -160,78 +160,183 @@ export default function AdminDashboard() {
                   <TabsTrigger value="criminals">Criminals</TabsTrigger>
                 </TabsList>
                 <TabsContent value="prisons">
-                  <form className="space-y-4 mt-4">
+                  <form
+                    className="space-y-4 mt-4"
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      const prisonName = e.target.prisonName.value;
+                      const prisonLocation = e.target.prisonLocation.value;
+                      const prisonCapacity = e.target.prisonCapacity.value;
+                      const wardenId = e.target.wardenId.value;
+
+                      const response = await fetch('/api/admin/judges/add_prison', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                          prison_name: prisonName,
+                          location: prisonLocation,
+                          capacity: parseInt(prisonCapacity, 10),
+                          warden: parseInt(wardenId, 10), // Ensure warden is a number
+                        }),
+                      });
+
+                      const result = await response.json();
+                      if (response.ok) {
+                        alert(result.message);
+                      } else {
+                        alert(`Error: ${result.message}`);
+                      }
+                    }}
+                  >
                     <div>
                       <Label htmlFor="prisonName">Prison Name</Label>
-                      <Input id="prisonName" placeholder="Enter prison name" />
+                      <Input id="prisonName" name="prisonName" placeholder="Enter prison name" required />
                     </div>
                     <div>
                       <Label htmlFor="prisonLocation">Location</Label>
-                      <Input id="prisonLocation" placeholder="Enter prison location" />
+                      <Input id="prisonLocation" name="prisonLocation" placeholder="Enter prison location" required />
                     </div>
                     <div>
                       <Label htmlFor="prisonCapacity">Capacity</Label>
-                      <Input id="prisonCapacity" type="number" placeholder="Enter prison capacity" />
+                      <Input
+                        id="prisonCapacity"
+                        name="prisonCapacity"
+                        type="number"
+                        placeholder="Enter prison capacity"
+                        required
+                      />
                     </div>
-                    <Button>Add Prison</Button>
+                    <div>
+                      <Label htmlFor="wardenId">Warden (Prison Official ID)</Label>
+                      <Input
+                        id="wardenId"
+                        name="wardenId"
+                        type="number"
+                        placeholder="Enter Warden ID"
+                        required
+                      />
+                    </div>
+                    <Button type="submit">Add Prison</Button>
                   </form>
                 </TabsContent>
                 <TabsContent value="crimes">
-                  <form className="space-y-4 mt-4">
+                  <form
+                    className="space-y-4 mt-4"
+                    onSubmit={async (e) => {
+                      e.preventDefault(); // Prevent the default form submission
+
+                      // Collect form data
+                      const crimeName = e.target.crimeName.value;
+                      const lawApplicable = e.target.lawApplicable.value;
+
+                      try {
+                        // Send data to your API
+                        const response = await fetch('/api/admin/judges/add_crime_criminals/add_crime', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify({
+                            crime_name: crimeName,
+                            law_applicable: lawApplicable,
+                          }),
+                        });
+
+                        // Handle the API response
+                        const result = await response.json();
+                        if (response.ok) {
+                          alert(result.message); // Show success message
+                          e.target.reset(); // Reset the form fields
+                        } else {
+                          alert(`Error: ${result.message}`); // Show error message
+                        }
+                      } catch (error) {
+                        console.error('Error submitting crime:', error);
+                        alert('An error occurred while submitting the crime.');
+                      }
+                    }}
+                  >
                     <div>
                       <Label htmlFor="crimeName">Crime Name</Label>
-                      <Input id="crimeName" placeholder="Enter crime name" />
+                      <Input id="crimeName" name="crimeName" placeholder="Enter crime name" required />
                     </div>
                     <div>
-                      <Label htmlFor="crimeDescription">Description</Label>
-                      <Input id="crimeDescription" placeholder="Enter crime description" />
+                      <Label htmlFor="lawApplicable">Law Applicable</Label>
+                      <Input id="lawApplicable" name="lawApplicable" placeholder="Enter law applicable" required />
                     </div>
-                    <div>
-                      <Label htmlFor="crimeSeverity">Severity</Label>
-                      <Select>
-                        <SelectTrigger id="crimeSeverity">
-                          <SelectValue placeholder="Select severity" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="minor">Minor</SelectItem>
-                          <SelectItem value="moderate">Moderate</SelectItem>
-                          <SelectItem value="severe">Severe</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <Button>Add Crime</Button>
+                    <Button type="submit">Add Crime</Button>
                   </form>
                 </TabsContent>
                 <TabsContent value="criminals">
-                  <form className="space-y-4 mt-4">
+                  <form
+                    className="space-y-4 mt-4"
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      const fname = e.target.fname.value;
+                      const lname = e.target.lname.value;
+                      const dob = e.target.dob.value;
+                      const address = e.target.address.value;
+                      const phoneNumber = e.target.phoneNumber.value;
+                      const email = e.target.email.value;
+
+                      const response = await fetch('/api/admin/judges/add_crime_criminals/add_criminal', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                          fname,
+                          lname,
+                          dob,
+                          address,
+                          phone_number: phoneNumber,
+                          email,
+                        }),
+                      });
+
+                      const result = await response.json();
+                      if (response.ok) {
+                        alert(result.message);
+                        e.target.reset(); // Reset form after successful submission
+                      } else {
+                        alert(`Error: ${result.message}`);
+                      }
+                    }}
+                  >
                     <div>
-                      <Label htmlFor="criminalName">Name</Label>
-                      <Input id="criminalName" placeholder="Enter criminal's name" />
+                      <Label htmlFor="fname">First Name</Label>
+                      <Input id="fname" name="fname" placeholder="Enter first name" required />
                     </div>
                     <div>
-                      <Label htmlFor="criminalAge">Age</Label>
-                      <Input id="criminalAge" type="number" placeholder="Enter criminal's age" />
+                      <Label htmlFor="lname">Last Name</Label>
+                      <Input id="lname" name="lname" placeholder="Enter last name" required />
                     </div>
                     <div>
-                      <Label htmlFor="criminalCrimes">Associated Crimes</Label>
-                      <Select>
-                        <SelectTrigger id="criminalCrimes">
-                          <SelectValue placeholder="Select crimes" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="theft">Theft</SelectItem>
-                          <SelectItem value="assault">Assault</SelectItem>
-                          <SelectItem value="fraud">Fraud</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Label htmlFor="dob">Date of Birth</Label>
+                      <Input id="dob" name="dob" type="date" required />
                     </div>
-                    <Button>Add Criminal</Button>
+                    <div>
+                      <Label htmlFor="address">Address</Label>
+                      <Input id="address" name="address" placeholder="Enter address" />
+                    </div>
+                    <div>
+                      <Label htmlFor="phoneNumber">Phone Number</Label>
+                      <Input id="phoneNumber" name="phoneNumber" type="text" placeholder="Enter phone number" />
+                    </div>
+                    <div>
+                      <Label htmlFor="email">Email</Label>
+                      <Input id="email" name="email" type="email" placeholder="Enter email" />
+                    </div>
+                    <Button type="submit">Add Criminal</Button>
                   </form>
-                </TabsContent>
+              </TabsContent>
               </Tabs>
             </CardContent>
           </Card>
-        </TabsContent>
+      </TabsContent>
+
 
         <TabsContent value="assign-complaints">
           <AssignComplaintsForm />
