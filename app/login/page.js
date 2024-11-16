@@ -32,6 +32,8 @@ export default function Login() {
         router.push('/admin');
       } else if(data.type_of_user === 'Police'){
           router.push('/police')
+      } else if(data.type_of_user === 'Judge') {
+          router.push('/judge')
       } else {
         router.push('/public_user'); // Assuming you have a public-user page
       }

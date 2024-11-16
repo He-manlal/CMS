@@ -8,7 +8,6 @@ import Label from "@/components/ui/label";
 import Button from "@/components/ui/button";
 import Select, { SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
-import Modal from '@/components/ui/modal';
 
 export default function AdminDashboard() {
   const router = useRouter(); 
@@ -20,6 +19,7 @@ export default function AdminDashboard() {
     policeOfficers: 0,
     judges: 0,
   });
+  const [judges, setJudges] = useState([]);
 
   useEffect(() => {
     const fetchDashboardStats = async () => {
@@ -337,58 +337,14 @@ export default function AdminDashboard() {
           </Card>
       </TabsContent>
 
-
         <TabsContent value="assign-complaints">
           <AssignComplaintsForm />
         </TabsContent>
 
         <TabsContent value="assign-cases">
-          <Card className="dashboard-card">
-            <CardHeader>
-              <CardTitle>Assign Cases</CardTitle>
-              <CardDescription>Assign cases to officials</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {/* Similar structure to Assign Complaints */}
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Case Title</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Assigned To</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {/* Mock data for cases */}
-                  {complaints.map((caseItem) => (
-                    <TableRow key={caseItem.id}>
-                      <TableCell>{caseItem.title}</TableCell>
-                      <TableCell>{caseItem.status}</TableCell>
-                      <TableCell>
-                        <Select>
-                          <SelectTrigger>
-                            <SelectValue placeholder={caseItem.assignedTo} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {officials.map((official) => (
-                              <SelectItem key={official.id} value={official.name}>
-                                {official.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell>
-                        <Button>Assign</Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+          <AssignCasesForm />
         </TabsContent>
+        
 
         <TabsContent value="complaints">
           <ComplaintsTab />
@@ -989,5 +945,240 @@ const DashboardCard = ({ title, value }) => {
     </Card>
   );
 };
+
+{/*
+function AssignCases() {
+  const [cases, setCases] = useState([]); // Store the fetched cases
+  const [loading, setLoading] = useState(true); // Loading state
+  const [error, setError] = useState(null); // For error handling
+  const [judges, setJudges] = useState([]);
+
+  // Fetch cases from the API
+  useEffect(() => {
+    const fetchCases = async () => {
+      try {
+        const response = await fetch('/api/admin/cases/fetch_for_case_assignment');
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch cases');
+        }
+
+        const data = await response.json();
+        console.log("Fetched data:", data); // Log the API response to check
+
+        if (Array.isArray(data.investigations)) {
+          setCases(data.investigations); // Set the cases in state
+        } else {
+          throw new Error('Expected investigations array but got something else');
+        }
+      } catch (error) {
+        console.error('Error fetching cases:', error);
+        setError(error.message); // Set the error message
+      } finally {
+        setLoading(false); // Set loading to false after fetch is complete
+      }
+    };
+
+    const fetchJudges = async () => {
+      try {
+        const response = await fetch('/api/admin/cases/fetch_judge_for_assignment'); // Replace with your actual API to fetch judges
+        const data = await response.json();
+        if (Array.isArray(data.judges)) {
+          setJudges(data.judges); // Set the judges in state
+        }
+      } catch (error) {
+        console.error('Error fetching judges:', error);
+      }
+    };
+
+    fetchCases();
+    
+  }, []); // Empty dependency array to run once on mount
+
+  // Log the cases whenever they change (useful for debugging)
+  useEffect(() => {
+    console.log('Updated cases state:', cases);
+    
+  }, [cases]);
+
+
+  return (
+      <Card className="dashboard-card">
+        <CardHeader>
+          <CardTitle>Assign Cases</CardTitle>
+          <CardDescription>Assign cases to officials</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div>Loading cases...</div>
+          ) : error ? (
+            <div>Error: {error}</div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Investigation ID</TableHead>
+                  <TableHead>Assigned To</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {cases.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan="3">No cases available</TableCell>
+                  </TableRow>
+                ) : (
+                  cases.map((caseItem) => (
+                    <TableRow key={caseItem}>
+                      <TableCell>{caseItem}</TableCell>
+                      <TableCell>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select judge" />
+                          </SelectTrigger>
+                          <SelectContent>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell>
+                        <Button>Assign</Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+  );
+}
+*/}
+
+
+function AssignCasesForm() {
+  const [cases, setCases] = useState([]); // List of investigation IDs
+  const [judges, setJudges] = useState([]); // List of judges
+  const [selectedJudge, setSelectedJudge] = useState({}); // Selected judge mapped by investigation ID
+
+  useEffect(() => {
+    async function fetchCases() {
+      try {
+        const response = await fetch('/api/admin/cases/fetch_for_case_assignment');
+        if (!response.ok) throw new Error('Failed to fetch cases');
+        const data = await response.json();
+        setCases(data.investigations || []); // Assuming data is an array of investigation IDs
+      } catch (error) {
+        console.error('Error fetching cases:', error);
+      }
+    }
+
+    fetchCases();
+  }, []);
+
+  useEffect(() => {
+    async function fetchJudges() {
+      try {
+        const response = await fetch('/api/admin/fetch_respective_officials?role=Judge');
+        if (!response.ok) throw new Error('Failed to fetch judges');
+        const data = await response.json();
+        setJudges(data.officials || []);
+      } catch (error) {
+        console.error('Error fetching judges:', error);
+      }
+    }
+
+    fetchJudges();
+  }, []);
+
+  const handleJudgeSelect = (investigationId, judgeId) => {
+    setSelectedJudge((prev) => ({
+      ...prev,
+      [investigationId]: judgeId,
+    }));
+  };
+
+  const handleAssignCase = async (investigationId) => {
+    const judgeId = selectedJudge[investigationId];
+
+    if (!judgeId) {
+      alert('Please select a judge to assign this case.');
+      return;
+    }
+
+    console.log('Assigning:', { investigationId, judgeId });
+
+    try {
+      const response = await fetch('/api/admin/cases/assign_cases', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ investigation_id: investigationId, judge_id: judgeId }),
+      });
+
+      if (!response.ok) throw new Error('Failed to assign case');
+
+      setCases((prevCases) => prevCases.filter((id) => id !== investigationId));
+      alert('Case assigned successfully.');
+    } catch (error) {
+      console.error('Error assigning case:', error);
+      alert('Failed to assign case. Please try again.');
+    }
+  };
+
+  return (
+    <Card className="dashboard-card">
+      <CardHeader>
+        <CardTitle>Assign Cases</CardTitle>
+        <CardDescription>Assign cases to judges</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Investigation ID</TableHead>
+              <TableHead>Assigned To</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {cases.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan="3">No cases available</TableCell>
+              </TableRow>
+            ) : (
+              cases.map((investigationId) => (
+                <TableRow key={investigationId}>
+                  <TableCell>{investigationId}</TableCell>
+                  <TableCell>
+                    <Select
+                      value={selectedJudge[investigationId] || ''}
+                      onValueChange={(value) => handleJudgeSelect(investigationId, value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Judge" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {judges.map((judge) => (
+                          <SelectItem key={judge.id} value={judge.id}>
+                            {judge.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                  <TableCell>
+                    <Button onClick={() => handleAssignCase(investigationId)}>
+                      Assign
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  );
+}
 
 

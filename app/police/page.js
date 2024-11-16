@@ -683,7 +683,6 @@ function FileChargesheetForm() {
       alert(data.message);
 
       // Handle success (clear form, etc.)
-      alert(response.data.message);
       setChargesheet({ investigationId: '', criminalSearch: '' });
       setSelectedCriminal('');
     } catch (error) {
