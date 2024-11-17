@@ -1,97 +1,85 @@
 "use client";
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
 
 export default function Home() {
   const images = [
-    '/images/1.png',
-    '/images/2.png',
-    '/images/3.png',
-    '/images/4.png',
-    '/images/5.png',
+    "/images/crime_1.jpg",
+    "/images/crime_2.jpg",
+    "/images/crime_3.jpg",
+    "/images/crime_4.jpg",
+    "/images/crime_5.jpg",
   ];
 
   const [currentImage, setCurrentImage] = useState(0);
-  const [isClient, setIsClient] = useState(false); // Add a state to track if it's client-side
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    setIsClient(true); // Set this to true when the component mounts on the client
+    setIsClient(true);
 
     const interval = setInterval(() => {
       setCurrentImage((prevIndex) => (prevIndex + 1) % images.length);
-    }, 4000); // Change image every 4 seconds
+    }, 4000);
 
-    return () => clearInterval(interval); // Clean up the interval on unmount
+    return () => clearInterval(interval);
   }, []);
 
-  // Random quote logic
   const quotes = [
-    "The only limit to our realization of tomorrow is our doubts of today.",
-    "Injustice anywhere is a threat to justice everywhere.",
-    "The best way to predict the future is to create it.",
-    "Crime does not pay, but the protection of society does.",
+    "Justice will not be served until those who are unaffected are as outraged as those who are.",
+    "The guilty may escape, but the innocent should never suffer.",
+    "Every crime leaves a trail — it's time to uncover it.",
+    "In the fight against crime, silence is not an option.",
   ];
   const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
 
-  const messages = [
-    "Submit reports and let authorities manage crime effectively.",
-    "Track and resolve crime cases efficiently.",
-    "Help make society safer with your reports.",
-    "Ensure justice is served through proper case management.",
-    "Contribute to a better, safer community."
-  ];
-
   if (!isClient) {
-    // Return a static layout on the server
     return null;
   }
 
   return (
-    <div className="min-h-screen bg-orange-500 flex items-center justify-center p-4 md:p-6">
-      {/* White Inner Container with min height */}
-      <div className="bg-white rounded-3xl shadow-lg w-[95%] min-h-full p-6 md:p-10">
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4 md:p-6">
+      {/* Inner Container */}
+      <div className="bg-gray-800 text-gray-100 rounded-3xl shadow-lg w-[95%] min-h-full p-6 md:p-10">
         {/* Top Right Buttons */}
         <div className="flex justify-end space-x-2 mb-8">
           <Link href="/login">
-            <button className="btn btn-error font-semibold shadow-md">
+            <button className="px-6 py-2 border border-gray-400 rounded hover:bg-gray-600 hover:border-gray-500 transition">
               Login
             </button>
           </Link>
           <Link href="/register">
-            <button className="btn btn-warning font-semibold shadow-md">
+            <button className="px-6 py-2 border border-gray-400 rounded hover:bg-gray-600 hover:border-gray-500 transition">
               Register
             </button>
           </Link>
         </div>
 
-        {/* Main Content with Slider and Text */}
-        <div className="relative flex flex-col md:flex-col items-center justify-between gap-8">
-          {/* Image Background with Text Overlay */}
-          <div className="relative w-full h-[60vh] md:h-[60vh] bg-cover bg-center rounded-lg shadow-lg transition-all duration-500">
-            {/* Image Section */}
+        {/* Main Content */}
+        <div className="relative flex flex-col items-center gap-8">
+          {/* Image Slider */}
+          <div className="relative w-full h-[60vh] bg-gray-700 rounded-lg overflow-hidden shadow-lg">
             <div
-              className="absolute inset-0 w-full h-full bg-cover bg-center"
+              className="absolute inset-0 bg-cover bg-center"
               style={{ backgroundImage: `url(${images[currentImage]})` }}
             ></div>
-
-            {/* Text Section Div with Background Blur */}
-            <div className="absolute inset-0 flex items-center justify-start bg-black bg-opacity-40 text-white p-6">
-              <div className="h-[100%] relative">
-                {/* Apply Blur Effect to Text Background */}
-                <div className="absolute inset-0 bg-black bg-opacity-60 backdrop-blur-lg rounded-lg"></div>
-                <div className="relative z-10 p-6">
-                  <h1 className="text-6xl md:text-6xl font-extrabold">
-                    <span className="text-orange-500">Crime Management System</span>
+            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70 p-6">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gray-800 bg-opacity-50 backdrop-blur-lg rounded-lg"></div>
+                <div className="relative z-10 p-6 text-center">
+                  <h1 className="text-4xl md:text-5xl font-bold uppercase text-white">
+                    Crime <span className="text-gray-300">Management System</span>
                   </h1>
-                  <p className="text-base md:text-lg mt-2 font-bold">Submit reports and let authorities manage crime effectively.</p>
+                  <p className="text-lg mt-4 text-gray-300">
+                    Investigate, report, and combat crime with precision.
+                  </p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Random Quote Section */}
-          <div className="mt-8 p-6 bg-black bg-opacity-10 text-center rounded-lg">
-            <p className="italic text-lg">{randomQuote}</p>
+          <div className="mt-8 p-6 bg-gray-700 text-center rounded-lg shadow">
+            <p className="italic text-gray-300 text-lg">{randomQuote}</p>
           </div>
         </div>
       </div>

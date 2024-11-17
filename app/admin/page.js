@@ -9,6 +9,15 @@ import Button from "@/components/ui/button";
 import Select, { SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
 
+
+const DashboardCard = ({ title, value }) => {
+  return (
+    <Card className="p-4">
+      <h2 className="text-xl font-semibold">{title}</h2>
+      <p className="text-2xl">{value}</p>
+    </Card>
+  );
+};
 export default function AdminDashboard() {
   const router = useRouter(); 
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -19,7 +28,6 @@ export default function AdminDashboard() {
     policeOfficers: 0,
     judges: 0,
   });
-  const [judges, setJudges] = useState([]);
 
   useEffect(() => {
     const fetchDashboardStats = async () => {
@@ -387,7 +395,6 @@ export default function AdminDashboard() {
     </div>
   );
 }
-
 function ManageOfficialForm({ role }) {
   const [Fname, setFname] = useState("");
   const [Lname, setLname] = useState("");
@@ -475,7 +482,8 @@ function ManageOfficialForm({ role }) {
       </div>
       <div>
         <Label htmlFor="DOB">Date of Birth</Label>
-        <Input id="DOB" type="date" value={DOB} onChange={(e) => setDOB(e.target.value)} />
+        <Input id="DOB" type="date" value={DOB} onChange={(e) => setDOB(e.target.value)}
+           />
       </div>
       
       {role === "Police Officer" && (
@@ -911,149 +919,150 @@ function ComplaintsTab() {
   );
 }
 
+
 const ExistingOfficialsTable = ({ officials }) => {
+  const [selectedOfficial, setSelectedOfficial] = useState(null);
+  const [phoneNumbers, setPhoneNumbers] = useState([]);
+  const [newPhoneNumber, setNewPhoneNumber] = useState("");
+
+  const handleEdit = async (police_id) => {
+    console.log('Edit button clicked for police_id:', police_id);
+    try {
+      const response = await fetch(`/api/admin/police/edit/get_pn`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ police_id }),
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch phone numbers');
+
+      const data = await response.json();
+      setPhoneNumbers(data.phoneNumbers || []);
+      setSelectedOfficial(police_id); // Set selected official to show phone numbers
+    } catch (error) {
+      console.error('Error fetching phone numbers:', error);
+    }
+  };
+
+  const handleAddPhoneNumber = async () => {
+    if (!newPhoneNumber) return;
+
+    try {
+      const response = await fetch(`/api/admin/police/edit/add_pn`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ police_id: selectedOfficial, phone_number: newPhoneNumber }),
+      });
+
+      if (!response.ok) throw new Error('Failed to add phone number');
+      setPhoneNumbers((prev) => [...prev, newPhoneNumber]);
+      setNewPhoneNumber(""); // Clear input field after successful addition
+    } catch (error) {
+      console.error('Error adding phone number:', error);
+    }
+  };
+
+  const handleDeletePhoneNumber = async (phoneNumber) => {
+    try {
+      const response = await fetch(`/api/admin/police/edit/delete_pn`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ police_id: selectedOfficial, phone_number: phoneNumber }),
+      });
+
+      if (!response.ok) throw new Error('Failed to delete phone number');
+      setPhoneNumbers((prev) => prev.filter((pn) => pn !== phoneNumber));
+    } catch (error) {
+      console.error('Error deleting phone number:', error);
+    }
+  };
+
+  const handleDelete = async (police_id) => {
+    try {
+      const response = await fetch('/api/admin/police/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ police_id }),
+      });
+
+      if (response.ok) {
+        alert('Police officer deleted successfully');
+        // Optionally refresh or update your UI here
+      } else {
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch (jsonError) {
+          console.warn('Response was not valid JSON:', jsonError);
+          errorData = { message: 'Unknown error occurred' };
+        }
+        alert(`Error: ${errorData.message}`);
+      }
+    } catch (error) {
+      console.error('Failed to delete police officer:', error);
+      alert('Error deleting police officer');
+    }
+  };
+
   return (
-    <Table className="mt-4">
-      <TableHeader>
-        <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead>Role</TableHead>
-          <TableHead>Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {officials.map((official) => (
-          <TableRow key={official.id}>
-            <TableCell>{official.name}</TableCell>
-            <TableCell>{official.role}</TableCell>
-            <TableCell>
-              <Button>Edit</Button>
-              <Button variant="destructive">Delete</Button>
-            </TableCell>
+    <>
+      <Table className="mt-4">
+        <TableHeader>
+          <TableRow>
+            <TableHead>Police Id</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Role</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {officials.map((official) => (
+            <TableRow key={official.id}>
+              <TableCell>{official.id}</TableCell>
+              <TableCell>{official.name}</TableCell>
+              <TableCell>{official.role}</TableCell>
+              <TableCell>
+                <Button onClick={() => handleEdit(official.id)}>Edit</Button>
+                <Button variant="destructive" onClick={() => handleDelete(official.id)}>
+                  Delete
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+
+      {selectedOfficial && (
+        <div className="phone-numbers">
+          <h3>Phone Numbers for Officer {selectedOfficial}</h3>
+          <ul>
+            {phoneNumbers.length > 0 ? (
+              phoneNumbers.map((phone, index) => (
+                <li key={index}>
+                  {phone}{" "}
+                  <Button variant="destructive" onClick={() => handleDeletePhoneNumber(phone)}>
+                    Delete
+                  </Button>
+                </li>
+              ))
+            ) : (
+              <p>No phone numbers available</p>
+            )}
+          </ul>
+          <input
+            type="text"
+            value={newPhoneNumber}
+            onChange={(e) => setNewPhoneNumber(e.target.value)}
+            placeholder="Add a new phone number"
+          />
+          <Button onClick={handleAddPhoneNumber}>Add Phone Number</Button>
+        </div>
+      )}
+    </>
   );
 };
 
-const DashboardCard = ({ title, value }) => {
-  return (
-    <Card className="p-4">
-      <h2 className="text-xl font-semibold">{title}</h2>
-      <p className="text-2xl">{value}</p>
-    </Card>
-  );
-};
 
-{/*
-function AssignCases() {
-  const [cases, setCases] = useState([]); // Store the fetched cases
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(null); // For error handling
-  const [judges, setJudges] = useState([]);
-
-  // Fetch cases from the API
-  useEffect(() => {
-    const fetchCases = async () => {
-      try {
-        const response = await fetch('/api/admin/cases/fetch_for_case_assignment');
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch cases');
-        }
-
-        const data = await response.json();
-        console.log("Fetched data:", data); // Log the API response to check
-
-        if (Array.isArray(data.investigations)) {
-          setCases(data.investigations); // Set the cases in state
-        } else {
-          throw new Error('Expected investigations array but got something else');
-        }
-      } catch (error) {
-        console.error('Error fetching cases:', error);
-        setError(error.message); // Set the error message
-      } finally {
-        setLoading(false); // Set loading to false after fetch is complete
-      }
-    };
-
-    const fetchJudges = async () => {
-      try {
-        const response = await fetch('/api/admin/cases/fetch_judge_for_assignment'); // Replace with your actual API to fetch judges
-        const data = await response.json();
-        if (Array.isArray(data.judges)) {
-          setJudges(data.judges); // Set the judges in state
-        }
-      } catch (error) {
-        console.error('Error fetching judges:', error);
-      }
-    };
-
-    fetchCases();
-    
-  }, []); // Empty dependency array to run once on mount
-
-  // Log the cases whenever they change (useful for debugging)
-  useEffect(() => {
-    console.log('Updated cases state:', cases);
-    
-  }, [cases]);
-
-
-  return (
-      <Card className="dashboard-card">
-        <CardHeader>
-          <CardTitle>Assign Cases</CardTitle>
-          <CardDescription>Assign cases to officials</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div>Loading cases...</div>
-          ) : error ? (
-            <div>Error: {error}</div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Investigation ID</TableHead>
-                  <TableHead>Assigned To</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {cases.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan="3">No cases available</TableCell>
-                  </TableRow>
-                ) : (
-                  cases.map((caseItem) => (
-                    <TableRow key={caseItem}>
-                      <TableCell>{caseItem}</TableCell>
-                      <TableCell>
-                        <Select>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select judge" />
-                          </SelectTrigger>
-                          <SelectContent>
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell>
-                        <Button>Assign</Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-  );
-}
-*/}
 
 
 function AssignCasesForm() {

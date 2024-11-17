@@ -157,31 +157,29 @@ export default function ComplaintPage() {
           <form onSubmit={handleSubmit}>
             <div className="grid w-full items-center gap-4">
               <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="natureOfCrime">Nature of Crime</Label>
-              <select
-                id="natureOfCrime"
-                aria-label="Nature of Crime"
-                value={natureOfCrime}
-                onChange={(e) => setNatureOfCrime(e.target.value)}
-                required
-                className="border rounded p-2" // Optional, add styling here if needed
-              >
-                <option value="" disabled>Select the nature of the crime</option>
-                <option value="Robbery">Robbery</option>
-                <option value="Assault">Assault</option>
-                <option value="Vandalism">Vandalism</option>
-                <option value="Kidnapping">Kidnapping</option>
-                <option value="Burglary">Burglary</option>
-                <option value="Murder">Murder</option>
-                <option value="Fraud">Fraud</option>
-                <option value="Cyber Crime">Cyber Crime</option>
+                <Label htmlFor="natureOfCrime">Nature of Crime</Label>
+                <select
+                  id="natureOfCrime"
+                  className="border rounded p-2"
+                  value={natureOfCrime}
+                  onChange={(e) => setNatureOfCrime(e.target.value)}
+                  required
+                >
+                  <option value="" disabled>Select the nature of the crime</option>
+                  <option value="Robbery">Robbery</option>
+                  <option value="Assault">Assault</option>
+                  <option value="Vandalism">Vandalism</option>
+                  <option value="Kidnapping">Kidnapping</option>
+                  <option value="Burglary">Burglary</option>
+                  <option value="Murder">Murder</option>
+                  <option value="Fraud">Fraud</option>
+                  <option value="Cyber Crime">Cyber Crime</option>
                 </select>
               </div>
               <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="description">Description</Label>
                 <Input
                   id="description"
-                  aria-label="Description"
                   placeholder="Provide a brief description of the complaint"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -193,9 +191,9 @@ export default function ComplaintPage() {
                 <Input
                   id="dateOfCrime"
                   type="date"
-                  aria-label="Date of Crime"
                   value={date_of_crime}
                   onChange={(e) => setDateOfCrime(e.target.value)}
+                  max={new Date().toISOString().split("T")[0]} // Sets max to today's date
                   required
                 />
               </div>
@@ -203,7 +201,6 @@ export default function ComplaintPage() {
                 <Label htmlFor="location">Location</Label>
                 <Input
                   id="location"
-                  aria-label="Location"
                   placeholder="Enter the location"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
@@ -214,7 +211,6 @@ export default function ComplaintPage() {
                 <Label htmlFor="filedAgainst">Filed Against</Label>
                 <Input
                   id="filedAgainst"
-                  aria-label="Filed Against"
                   placeholder="Enter the name of the accused (if known)"
                   value={filedAgainst}
                   onChange={(e) => setFiledAgainst(e.target.value)}
@@ -244,31 +240,29 @@ export default function ComplaintPage() {
               <p>No previous complaints found.</p>
             ) : (
               previousComplaints.map((complaint) => (
-                <li key={`complaint-${complaint.complaint_id}`}> {/* Ensure unique key */}
+                <li key={`complaint-${complaint.complaint_id}`}>
                   <Card>
-                  <CardHeader className="flex items-center">
-                    <div className="flex-1 cursor-pointer" onClick={() => toggleComplaint(complaint.complaint_id)}>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg">{complaint.description}</CardTitle>
-                        <Badge className={`ml-2 ${getStatusColor(complaint.status)}`}>
-                          {complaint.status}
-                        </Badge>
+                    <CardHeader className="flex items-center">
+                      <div
+                        className="flex-1 cursor-pointer"
+                        onClick={() => toggleComplaint(complaint.complaint_id)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-lg">{complaint.description}</CardTitle>
+                          <Badge className={`ml-2 ${getStatusColor(complaint.status)}`}>
+                            {complaint.status}
+                          </Badge>
+                        </div>
+                        <CardDescription>Filed on: {complaint.date_filed}</CardDescription>
                       </div>
-                      <CardDescription className="inline-block">Filed on: {complaint.date_filed}</CardDescription>
-                    </div>
-                  </CardHeader>
-                    {expandedComplaint === complaint.complaint_id && ( // Only render details if expanded
+                    </CardHeader>
+                    {expandedComplaint === complaint.complaint_id && (
                       <CardContent>
                         <div>
-                          <p><strong>Nature of Crime:</strong> {complaint.nature_of_crime}</p>
+                          <p><strong>Nature of Crime:</strong> {complaint.natureOfCrime}</p>
+                          <p><strong>Location:</strong> {complaint.location}</p>
+                          <p><strong>Filed Against:</strong> {complaint.filedAgainst || "N/A"}</p>
                           <p><strong>Date of Crime:</strong> {complaint.date_of_crime}</p>
-                          <p><strong>Location</strong> {complaint.location}</p>
-
-                          <span>
-                            <strong>Status:</strong> {complaint.status === "Resolved"
-                              ? "This complaint has been resolved"
-                              : "This complaint is still being processed"}
-                          </span>
                         </div>
                       </CardContent>
                     )}
