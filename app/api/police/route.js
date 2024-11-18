@@ -84,6 +84,7 @@ export async function POST(req) {
     }
 }
 
+
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const officialEmail = searchParams.get('officialEmail');

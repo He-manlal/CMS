@@ -925,57 +925,57 @@ const ExistingOfficialsTable = ({ officials }) => {
   const [phoneNumbers, setPhoneNumbers] = useState([]);
   const [newPhoneNumber, setNewPhoneNumber] = useState("");
 
-  const handleEdit = async (police_id) => {
-    console.log('Edit button clicked for police_id:', police_id);
-    try {
-      const response = await fetch(`/api/admin/police/edit/get_pn`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ police_id }),
-      });
+  // const handleEdit = async (police_id) => {
+  //   console.log('Edit button clicked for police_id:', police_id);
+  //   try {
+  //     const response = await fetch(`/api/admin/police/edit/get_pn`, {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({ police_id }),
+  //     });
 
-      if (!response.ok) throw new Error('Failed to fetch phone numbers');
+  //     if (!response.ok) throw new Error('Failed to fetch phone numbers');
 
-      const data = await response.json();
-      setPhoneNumbers(data.phoneNumbers || []);
-      setSelectedOfficial(police_id); // Set selected official to show phone numbers
-    } catch (error) {
-      console.error('Error fetching phone numbers:', error);
-    }
-  };
+  //     const data = await response.json();
+  //     setPhoneNumbers(data.phoneNumbers || []);
+  //     setSelectedOfficial(police_id); // Set selected official to show phone numbers
+  //   } catch (error) {
+  //     console.error('Error fetching phone numbers:', error);
+  //   }
+  // };
 
-  const handleAddPhoneNumber = async () => {
-    if (!newPhoneNumber) return;
+  // const handleAddPhoneNumber = async () => {
+  //   if (!newPhoneNumber) return;
 
-    try {
-      const response = await fetch(`/api/admin/police/edit/add_pn`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ police_id: selectedOfficial, phone_number: newPhoneNumber }),
-      });
+  //   try {
+  //     const response = await fetch(`/api/admin/police/edit/add_pn`, {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({ police_id: selectedOfficial, phone_number: newPhoneNumber }),
+  //     });
 
-      if (!response.ok) throw new Error('Failed to add phone number');
-      setPhoneNumbers((prev) => [...prev, newPhoneNumber]);
-      setNewPhoneNumber(""); // Clear input field after successful addition
-    } catch (error) {
-      console.error('Error adding phone number:', error);
-    }
-  };
+  //     if (!response.ok) throw new Error('Failed to add phone number');
+  //     setPhoneNumbers((prev) => [...prev, newPhoneNumber]);
+  //     setNewPhoneNumber(""); // Clear input field after successful addition
+  //   } catch (error) {
+  //     console.error('Error adding phone number:', error);
+  //   }
+  // };
 
-  const handleDeletePhoneNumber = async (phoneNumber) => {
-    try {
-      const response = await fetch(`/api/admin/police/edit/delete_pn`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ police_id: selectedOfficial, phone_number: phoneNumber }),
-      });
+  // const handleDeletePhoneNumber = async (phoneNumber) => {
+  //   try {
+  //     const response = await fetch(`/api/admin/police/edit/delete_pn`, {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({ police_id: selectedOfficial, phone_number: phoneNumber }),
+  //     });
 
-      if (!response.ok) throw new Error('Failed to delete phone number');
-      setPhoneNumbers((prev) => prev.filter((pn) => pn !== phoneNumber));
-    } catch (error) {
-      console.error('Error deleting phone number:', error);
-    }
-  };
+  //     if (!response.ok) throw new Error('Failed to delete phone number');
+  //     setPhoneNumbers((prev) => prev.filter((pn) => pn !== phoneNumber));
+  //   } catch (error) {
+  //     console.error('Error deleting phone number:', error);
+  //   }
+  // };
 
   const handleDelete = async (police_id) => {
     try {
@@ -1022,7 +1022,6 @@ const ExistingOfficialsTable = ({ officials }) => {
               <TableCell>{official.name}</TableCell>
               <TableCell>{official.role}</TableCell>
               <TableCell>
-                <Button onClick={() => handleEdit(official.id)}>Edit</Button>
                 <Button variant="destructive" onClick={() => handleDelete(official.id)}>
                   Delete
                 </Button>

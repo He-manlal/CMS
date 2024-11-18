@@ -17,14 +17,12 @@ export async function GET(request) {
     const decoded = jwt.verify(token, secretKey);
     const userId = decoded.userId;
 
-    // Query to fetch the previous complaints filed by the user
-    const [complaints] = await pool.execute(
-      `SELECT complaint_id, description, date_of_crime, nature_of_crime, location, filed_against, status, date_filed 
-       FROM complaint 
-       WHERE filed_by = ?`,
-      [userId]
-    );
+    // Call the stored procedure to fetch complaints
+    const [results] = await pool.execute('CALL GetUserComplaints(?)', [userId]);
 
+    // Extract complaints from the result set
+    const complaints = results[0];
+    
     return NextResponse.json({ success: true, complaints });
 
   } catch (error) {
