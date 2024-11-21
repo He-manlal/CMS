@@ -1,3 +1,5 @@
+//show the procedure
+//procedure has count -> aggregate function
 import { NextResponse } from 'next/server';
 import pool from '/app/lib/db'; 
 
@@ -14,3 +16,4 @@ export async function GET() {
     return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
   }
 }
+

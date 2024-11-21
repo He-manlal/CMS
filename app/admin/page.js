@@ -323,7 +323,7 @@ export default function AdminDashboard() {
                     </div>
                     <div>
                       <Label htmlFor="dob">Date of Birth</Label>
-                      <Input id="dob" name="dob" type="date" required />
+                      <Input id="dob" name="dob" type="date" max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split("T")[0]} required />
                     </div>
                     <div>
                       <Label htmlFor="address">Address</Label>
@@ -359,37 +359,7 @@ export default function AdminDashboard() {
         </TabsContent>
         
         <TabsContent value="cases">
-          <Card className="dashboard-card">
-            <CardHeader>
-              <CardTitle>Cases</CardTitle>
-              <CardDescription>View all cases</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {/* Similar structure to Complaints */}
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Case Title</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Assigned To</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {complaints.map((caseItem) => (
-                    <TableRow key={caseItem.id}>
-                      <TableCell>{caseItem.title}</TableCell>
-                      <TableCell>{caseItem.status}</TableCell>
-                      <TableCell>{caseItem.assignedTo}</TableCell>
-                      <TableCell>
-                        <Button>View</Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+          <CasesComponent/>
         </TabsContent>
       </Tabs>
     </div>
@@ -404,6 +374,8 @@ function ManageOfficialForm({ role }) {
   const [court, setCourt] = useState("");
   const [official_email, setOfficialEmail] = useState("");
   const [phoneNumbers, setPhoneNumbers] = useState([""]);
+  const today = new Date();
+  const maxDate = new Date(today.getFullYear() - 21, today.getMonth(), today.getDate()).toISOString().split("T")[0];
 
   const handlePhoneChange = (index, value) => {
     const newPhoneNumbers = [...phoneNumbers];
@@ -482,7 +454,7 @@ function ManageOfficialForm({ role }) {
       </div>
       <div>
         <Label htmlFor="DOB">Date of Birth</Label>
-        <Input id="DOB" type="date" value={DOB} onChange={(e) => setDOB(e.target.value)}
+        <Input id="DOB" type="date" value={DOB} max={maxDate} onChange={(e) => setDOB(e.target.value)}
            />
       </div>
       
@@ -1061,9 +1033,6 @@ const ExistingOfficialsTable = ({ officials }) => {
   );
 };
 
-
-
-
 function AssignCasesForm() {
   const [cases, setCases] = useState([]); // List of investigation IDs
   const [judges, setJudges] = useState([]); // List of judges
@@ -1189,4 +1158,58 @@ function AssignCasesForm() {
   );
 }
 
+const CasesComponent = () => {
+  const [cases, setCases] = useState([]);
 
+  useEffect(() => {
+    const fetchCases = async () => {
+      try {
+        const response = await fetch('/api/admin/cases/fetch_all_cases');
+        const data = await response.json();
+        if (data.success) {
+          setCases(data.data);
+        } else {
+          console.error(data.message);
+        }
+      } catch (error) {
+        console.error('Error fetching cases:', error);
+      }
+    };
+
+    fetchCases();
+  }, []);
+
+  return (
+    <Card className="dashboard-card">
+      <CardHeader>
+        <CardTitle>Cases</CardTitle>
+        <CardDescription>View all cases</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Case ID</TableHead>
+              <TableHead>Assigned To (Judge)</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {cases.length > 0 ? (
+              cases.map((caseItem) => (
+                <TableRow key={caseItem.caseId}>
+                  <TableCell>{caseItem.caseId}</TableCell>
+                  <TableCell>{caseItem.judgeName || 'Unassigned'}</TableCell>
+                  
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan="4">No cases found.</TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  );
+};

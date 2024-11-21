@@ -1,6 +1,6 @@
 // /pages/api/complaints/withdraw.js
 import { NextResponse } from 'next/server';
-import pool from '../../../lib/db'; // Assuming pool is correctly set up for MySQL connection
+import pool from '/app/lib/db'; // Assuming pool is correctly set up for MySQL connection
 
 export async function POST(req) {
   try {

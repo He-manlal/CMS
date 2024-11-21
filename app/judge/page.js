@@ -509,6 +509,35 @@ export default function JudgesPage() {
     }
   };
   
+  const handleAssignVerdict = async (caseId, verdict) => {
+    try {
+      const response = await fetch(`/api/judges/assign_verdict`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ caseId, verdict }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        alert(`Error: ${data.message || "Failed to assign verdict"}`);
+        return;
+      } else {
+        alert(data.message);
+      }
+
+      // Optimistically update the case status in the UI
+      setCases((prevCases) =>
+        prevCases.map((c) =>
+          c.id === caseId ? { ...c, verdict } : c
+        )
+      );
+    } catch (error) {
+      console.error("Error assigning verdict:", error);
+      alert("An unexpected error occurred. Please try again.");
+    }
+  };
 
   if (!judge) {
     return <div>Loading judge details...</div>;
@@ -638,9 +667,9 @@ export default function JudgesPage() {
               </div>
 
               {/* The Guilty and Acquitted buttons, unchanged */}
-              <div className="mt-4 flex space-x-4">
-                <Button variant="destructive">Guilty</Button>
-                <Button variant="outline">Acquitted</Button>
+              <div className="mt-4 flex space-x-4">                  
+                <Button onClick={() => handleAssignVerdict(case_.id, "Guilty")}>Guilty</Button>
+                <Button onClick={() => handleAssignVerdict(case_.id, "Acquitted")}>Acquitted</Button>
               </div>
             </AccordionContent>
           </AccordionItem>
